@@ -12,7 +12,7 @@ class Splashscreen extends StatelessWidget {
       body: Center(
         child: ElevatedButton(
           onPressed: () {
-            Navigator.of(context).pushReplacement(RouteManager.createRoute(const Homescreen()));
+            Navigator.of(context).pushReplacement(RouteManager.createRoute(Homescreen()));
           },
           child: const Text('Go!'),
         ),
