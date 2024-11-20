@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class Notificationscreen extends StatelessWidget {
   const Notificationscreen({super.key});
@@ -6,9 +7,13 @@ class Notificationscreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-    appBar: AppBar(
-      title: const Text("Notifications", style: TextStyle(color: Colors.blue, fontSize: 30)), 
-    ),  
+      appBar: AppBar(
+        title: Text(
+          "Notifications",
+          style: GoogleFonts.adventPro(
+              color: Colors.black, fontSize: 24, fontWeight: FontWeight.w600),
+        ),
+      ),
     );
   }
 }

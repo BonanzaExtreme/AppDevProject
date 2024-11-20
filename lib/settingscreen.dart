@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-class Settingscreen extends StatelessWidget{
+class Settingscreen extends StatelessWidget {
   const Settingscreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-      title: const Text("Settings", style: TextStyle(color: Colors.blue, fontSize: 30)), 
-    ),  
+        title: Text(
+          "Settings",
+          style: GoogleFonts.adventPro(
+              color: Colors.black, fontSize: 24, fontWeight: FontWeight.w600),
+        ),
+      ),
     );
   }
 }

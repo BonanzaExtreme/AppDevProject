@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class Favoritescreen extends StatelessWidget {
   const Favoritescreen({super.key});
@@ -6,9 +7,13 @@ class Favoritescreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-    appBar: AppBar(
-      title: const Text("Favorites", style: TextStyle(color: Colors.blue, fontSize: 30)), 
-    ),  
+      appBar: AppBar(
+        title: Text(
+          "Favorites",
+          style: GoogleFonts.adventPro(
+              color: Colors.black, fontSize: 24, fontWeight: FontWeight.w600),
+        ),
+      ),
     );
   }
 }
