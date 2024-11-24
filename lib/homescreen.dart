@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:project/apifetcher.dart';
 import 'package:project/navbar.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:share_plus/share_plus.dart';
 
 class Homescreen extends StatefulWidget {
   @override
@@ -12,6 +15,22 @@ class _HomescreenState extends State<Homescreen> {
   final Apifetcher _quoteService = Apifetcher();
   List<Map<String, dynamic>> _quotes = [];
   List<String> _keywords = [];
+  List<String> _categoryimagePath = [
+    'assets/images/',
+    'assets/images/',
+    'assets/images/',
+    'assets/images/',
+    'assets/images/',
+    'assets/images/'
+        'assets/images/',
+    'assets/images/',
+    'assets/images/',
+    'assets/images/',
+    'assets/images/',
+    'assets/images/',
+    'assets/images/'
+        'assets/images/'
+  ];
   String _selectedCategory = ''; // Default to empty so random
 
   @override
@@ -119,15 +138,17 @@ class _HomescreenState extends State<Homescreen> {
                             children: [
                               IconButton(
                                 icon: Icon(Icons.favorite),
-                                onPressed: () {},
+                                onPressed: () {
+                                  _addTofavorites(quote, author);
+                                },
                               ),
-                              SizedBox(width: 20), // Space between icons
+                              SizedBox(
+                                  width:
+                                      20), // Space between heart and favorite icon
 
                               IconButton(
                                 icon: Icon(Icons.share),
-                                onPressed: () {
-                                  // Handle share action
-                                },
+                                onPressed: () async {},
                               ),
                             ],
                           ),
@@ -143,6 +164,19 @@ class _HomescreenState extends State<Homescreen> {
     );
   }
 
+  Future<void> _addTofavorites(String quote, String author) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> favorite_quotes = prefs.getStringList('favorite_quotes') ?? [];
+
+    String quoteText = "$quote - $author";
+
+    if (!favorite_quotes.contains(quoteText)) {
+      favorite_quotes.add(quoteText);
+    }
+
+    await prefs.setStringList('favorite_quotes', favorite_quotes);
+  }
+
   void bottomsheet(context) {
     showModalBottomSheet(
       context: context,
@@ -155,21 +189,28 @@ class _HomescreenState extends State<Homescreen> {
           child: Column(
             children: [
               Title(
-                color: Colors.blue,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 20),
-                  child: Text(
-                    "CATEGORIES",
-                    style: GoogleFonts.adventPro(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 20,
-                        color: Colors.black),
-                  ),
-                ),
-              ),
+                  color: Colors.blue,
+                  child: Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                          border:
+                              Border(bottom: BorderSide(color: Colors.black))),
+                      child: Container(
+                          child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 10),
+                        child: Center(
+                          child: Text(
+                            "CATEGORIES",
+                            style: GoogleFonts.adventPro(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 20,
+                                color: Colors.black),
+                          ),
+                        ),
+                      )))),
               Expanded(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                   child: GridView.builder(
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
@@ -180,34 +221,44 @@ class _HomescreenState extends State<Homescreen> {
                     itemCount: _keywords.length,
                     itemBuilder: (context, index) {
                       return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _selectedCategory = _keywords[index];
-                          });
-                          _fetchQuotes(category: _keywords[index]);
-                          Navigator.pop(context);
-                        },
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                              vertical: 10, horizontal: 20),
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 255, 255, 255),
-                            borderRadius: BorderRadius.circular(4),
-                            border: Border.all(
-                              width: 1,
-                              color: const Color.fromARGB(255, 41, 41, 41),
-                            ),
-                          ),
-                          child: Text(
-                            _keywords[index],
-                            textAlign: TextAlign.right,
-                            style: GoogleFonts.adventPro(
-                                color: Colors.black,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                      );
+                          onTap: () {
+                            setState(() {
+                              _selectedCategory = _keywords[index];
+                            });
+                            _fetchQuotes(category: _keywords[index]);
+                            Navigator.pop(context);
+                          },
+                          child: Container(
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 10, horizontal: 20),
+                              decoration: BoxDecoration(
+                                color: const Color.fromARGB(255, 255, 255, 255),
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(
+                                  width: 1,
+                                  color: const Color.fromARGB(255, 41, 41, 41),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    _keywords[index],
+                                    textAlign: TextAlign.right,
+                                    style: GoogleFonts.adventPro(
+                                        color: Colors.black,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                  SizedBox(width: 8),
+                                  Image.asset(
+                                    _categoryimagePath[index],
+                                    height: 20,
+                                    width: 20,
+                                  )
+                                ],
+                              )));
                     },
                   ),
                 ),
