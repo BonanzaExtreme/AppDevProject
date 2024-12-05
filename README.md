@@ -5,5 +5,5 @@ Welcome to upliftme. This application was developed as a project requirement for
 API provider: 
 https://zenquotes.io/
 
-Sources for the icons used in the application: 
+Source for the icons used in the application: 
 https://www.freepik.com/
