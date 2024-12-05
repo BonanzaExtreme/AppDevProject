@@ -4,7 +4,7 @@ import 'dart:convert';
 
 class Apifetcher {
   final String baseUrl =
-      "https://zenquotes.io/api/quotes/[366d72907b7f6f2b6e47d9d10a77b108]";
+      "https://zenquotes.io/api/quotes/[your_key]";
   Future<List<String>> fetchKeywords() async {
     List<String> categories = [
       'anxiety',
@@ -42,7 +42,7 @@ class Apifetcher {
 
   Future<List<Map<String, dynamic>>> fetchQuotes({String? keyword}) async {
     String url =
-        "https://zenquotes.io/api/quotes/[366d72907b7f6f2b6e47d9d10a77b108]";
+        "https://zenquotes.io/api/quotes/[your_key]";
 
     if (keyword != null && keyword.isNotEmpty) {
       url = "$url&keyword=$keyword";
