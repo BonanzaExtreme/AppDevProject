@@ -13,7 +13,7 @@ class Navbar extends StatelessWidget {
       child: Container(
         color: Colors.white,
         child: ListView(
-          padding: EdgeInsets.symmetric(vertical: 20),
+          padding: EdgeInsets.symmetric(vertical: 40),
           children: [
             Container(
               padding: const EdgeInsets.all(16.0),
@@ -49,7 +49,7 @@ class Navbar extends StatelessWidget {
               hoverColor: Colors.white,
               onTap: () => selectedItem(context, 1),
             ),
-            ListTile(
+            /*ListTile(
               leading: const Icon(Icons.settings),
               title: Text(
                 'Settings',
@@ -60,7 +60,7 @@ class Navbar extends StatelessWidget {
               ),
               hoverColor: Colors.white,
               onTap: () => selectedItem(context, 2),
-            )
+            ) */
           ],
         ),
       ),

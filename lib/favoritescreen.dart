@@ -31,6 +31,7 @@ class _FavoritescreenState extends State<Favoritescreen> {
       _favorite_quotes.removeAt(index);
     });
     await prefs.setStringList('favorite_quotes', _favorite_quotes);
+    Navigator.pop(context, _favorite_quotes);
   }
 
   @override
@@ -86,7 +87,10 @@ class _FavoritescreenState extends State<Favoritescreen> {
                                 },
                                 icon: Icon(Icons.delete, color: Colors.black)),
                             IconButton(
-                                onPressed: () async {},
+                                onPressed: () async {
+                                  final share = await Share.share('$quote');
+                                  print(share);
+                                },
                                 icon: Icon(Icons.share, color: Colors.black))
                           ],
                         ),

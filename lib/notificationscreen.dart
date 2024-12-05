@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -5,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:project/apifetcher.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Notificationscreen extends StatefulWidget {
   const Notificationscreen({super.key});
@@ -18,7 +20,6 @@ class _NotificationscreenState extends State<Notificationscreen> {
       FlutterLocalNotificationsPlugin();
 
   List<String> categories = [
-    'random',
     'anxiety',
     'change',
     'choice',
@@ -57,23 +58,32 @@ class _NotificationscreenState extends State<Notificationscreen> {
   @override
   void initState() {
     super.initState();
+
     tz.initializeTimeZones();
     print("Time zones initialized");
     _intializeNotification();
     _createNotificationChannel();
+    _requestIOSPermissions();
+    _loadSettings();
   }
 
   void _intializeNotification() async {
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
+    const DarwinInitializationSettings initializationSettingsIOS =
+        DarwinInitializationSettings();
+
     const InitializationSettings initializationSettings =
-        InitializationSettings(android: initializationSettingsAndroid);
+        InitializationSettings(
+            android: initializationSettingsAndroid,
+            iOS: initializationSettingsIOS);
 
     await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
   void _createNotificationChannel() async {
+    //android
     const AndroidNotificationChannel channel = AndroidNotificationChannel(
       'channelId',
       'channelName',
@@ -85,6 +95,49 @@ class _NotificationscreenState extends State<Notificationscreen> {
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
+  }
+
+  void _requestIOSPermissions() async {
+    //apple
+    if (Platform.isIOS) {
+      await _flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              IOSFlutterLocalNotificationsPlugin>()
+          ?.requestPermissions(
+            alert: true,
+            badge: true,
+            sound: true,
+          );
+    }
+  }
+
+  Future<void> _saveSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('selectedCategoryIndex', _selectedCategoryIndex);
+    await prefs.setInt('notificationCount', _notificationCount);
+    await prefs.setInt('frequencyIndex', _frequencyIndex);
+    await prefs.setInt('startHour', _startTime.hour);
+    await prefs.setInt('startMinute', _startTime.minute);
+    await prefs.setInt('endHour', _endTime.hour);
+    await prefs.setInt('endminute', _endTime.minute);
+  }
+
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _selectedCategoryIndex = prefs.getInt('selectedCategoryIndex') ?? 0;
+      _notificationCount = prefs.getInt('notificationCount') ?? 1;
+      _frequencyIndex = prefs.getInt('frequencyIndex') ?? 0;
+
+      int startHour = prefs.getInt('startHour') ?? 8; // Default to 8 AM
+      int startMinute =
+          prefs.getInt('startMinute') ?? 0; // Default to 0 minutes
+      int endHour = prefs.getInt('endHour') ?? 20; // Default to 8 PM
+      int endMinute = prefs.getInt('endMinute') ?? 0; // Default to 0 minutes
+
+      _startTime = TimeOfDay(hour: startHour, minute: startMinute);
+      _endTime = TimeOfDay(hour: endHour, minute: endMinute);
+    });
   }
 
   void _fetchQuotes() async {
@@ -106,8 +159,7 @@ class _NotificationscreenState extends State<Notificationscreen> {
           _startTime.hour,
           _startTime.minute,
         );
-        tz.TZDateTime tzStartTime =
-            tz.TZDateTime.from(startDateTime, tz.getLocation('Asia/Singapore'));
+        tz.TZDateTime tzStartTime = tz.TZDateTime.from(startDateTime, tz.local);
 
         DateTime endDateTime = DateTime(
           DateTime.now().year,
@@ -116,8 +168,7 @@ class _NotificationscreenState extends State<Notificationscreen> {
           _endTime.hour,
           _endTime.minute,
         );
-        tz.TZDateTime tzEndTime =
-            tz.TZDateTime.from(endDateTime, tz.getLocation('Asia/Singapore'));
+        tz.TZDateTime tzEndTime = tz.TZDateTime.from(endDateTime, tz.local);
 
         String quote =
             quotes[i % quotes.length]['quote'] ?? "No quote available";
@@ -141,24 +192,40 @@ class _NotificationscreenState extends State<Notificationscreen> {
       int id, String title, String body, tz.TZDateTime tzdatetime) async {
     const AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails('channelId', 'channelName',
-            channelDescription: 'This is notiifcation.',
+            channelDescription: 'This is notifcation.',
             importance: Importance.max,
             priority: Priority.high);
 
     const NotificationDetails platformdetails =
         NotificationDetails(android: androidDetails);
-
-    await _flutterLocalNotificationsPlugin.zonedSchedule(
-      id,
-      title,
-      body,
-      tzdatetime,
-      platformdetails,
-      androidScheduleMode: AndroidScheduleMode.exact,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.dateAndTime,
-    );
+    print(
+        "Scheduling notification ID: $id, Title: $title, Body: $body, Scheduled Time: $tzdatetime");
+    if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+      await _flutterLocalNotificationsPlugin.zonedSchedule(
+        id,
+        title,
+        body,
+        tzdatetime,
+        platformdetails,
+        androidScheduleMode: AndroidScheduleMode.exact,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.dateAndTime,
+      );
+    } else {
+      await _flutterLocalNotificationsPlugin.zonedSchedule(
+        id,
+        title,
+        body,
+        tzdatetime,
+        platformdetails,
+        androidScheduleMode: AndroidScheduleMode.exact,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.dateAndTime,
+      );
+    }
+    print("Notification scheduled at: ${tzdatetime.toLocal()}");
   }
 
   @override
@@ -345,7 +412,7 @@ class _NotificationscreenState extends State<Notificationscreen> {
 
   Widget _TimePicker() {
     return _SettingBox(
-        title: 'Duration of Notification',
+        title: 'Start of Notification',
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -354,11 +421,11 @@ class _NotificationscreenState extends State<Notificationscreen> {
                 _startTime = selectedTime;
               });
             }),
-            _Timebutton("End Time", _endTime, (selectedTime) {
+            /* _Timebutton("End Time", _endTime, (selectedTime) {
               setState(() {
                 _endTime = selectedTime;
               });
-            })
+            })*/
           ],
         ));
   }
@@ -375,6 +442,7 @@ class _NotificationscreenState extends State<Notificationscreen> {
               if (newTime != null) {
                 onTimeSelected(newTime);
               }
+              _saveSettings();
             },
             child: Text(selectedTime.format(context)))
       ],
