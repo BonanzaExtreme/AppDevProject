@@ -1,16 +1,9 @@
 # project
 
-A new Flutter project.
+Welcome to upliftme. This application was developed as a project requirement for our app development course. The app was built using flutter. 
 
-## Getting Started
+API provider: 
+https://zenquotes.io/
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Sources for the icons used in the application: 
+https://www.freepik.com/
